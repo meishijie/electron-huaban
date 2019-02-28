@@ -144,8 +144,9 @@ function checkUpdateId(__checkNewId) {
       console.log("创建文件");
       fs.writeFileSync(_board_id_path + "/update.txt", __checkNewId);
       console.log("创建id完成");
-      // 先获取所有图片
-      loopGetAllImages();
+      // 先获取所有图片 定时器模式
+      setInterval(loopGetAllImages, 1500);
+      // loopGetAllImages();
     }
   });
 }
