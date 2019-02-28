@@ -31,7 +31,7 @@ var cheerio = require("cheerio");
 var Bagpipe = require("bagpipe");
 
 //画板的id
-var _board_id = "35083";
+var _board_id = "32813392";
 // 检查翻页的id
 var _maxid = "";
 // 每次打开的图片
@@ -49,7 +49,8 @@ var _url =
 // var imgList = [];
 
 var foldname = "images"; // = _board_id 需要根据画板id赋值 创建对应的文件夹
-// 硬盘路径 可以设置
+// 硬盘路径 可以设置  /Users/meishijie/Documents/GitHub/electron-huaban  E:/图片搜藏/huaban
+// var GPATH = "/Users/meishijie/Documents/GitHub/electron-huaban/huaban";
 var GPATH = "E:/图片搜藏/huaban";
 // 硬盘路径下的文件夹
 var _board_id_path = GPATH + "/" + _board_id;
@@ -145,34 +146,50 @@ function checkUpdateId(__checkNewId) {
       fs.writeFileSync(_board_id_path + "/update.txt", __checkNewId);
       console.log("创建id完成");
       // 先获取所有图片 定时器模式
-      setInterval(loopGetAllImages, 1500);
-      // loopGetAllImages();
+      loopGetAllImages();
     }
   });
 }
 //循环获取所有图片到 _allGroups
 function loopGetAllImages() {
   console.log(_allComplete);
-  // 根据_allComplete 判断是否要循环
+  if(_allComplete != false){
+    console.log('可以开始下载了！');
+    return;
+  }else{
+    // 根据_allComplete 判断是否要循环
+    _url = "http://huaban.com/boards/" + _board_id +"/?max=" +_maxid +"&limit=" +_limit +"&wfl=1";
+    getSomeAddr(_url);
+  }
+  
 }
 // 下载一批图片
-function downLoadSome(__url) {
+function getSomeAddr(__url) {
   //获取花瓣的网页代码
   request(__url, function(err, res, body) {
     if (!err && res.statusCode === 200) {
       var regExp = /"pin_id":(.*?),.+?"file_id":(.*?),.+?"file":\{.+?"key":(.*?),.+?"type":"image\/(.*?)"/g; //未使用g选项
       // 循环匹配出文字内容
       while ((res = regExp.exec(body))) {
-        console.log(res.length);
         var temparray = [];
         temparray.push(res[1], res[3].slice(1, -1), res[4]);
         _allGroups.push(temparray);
+        // console.log(temparray);
+      }
+      if(_maxid==_allGroups[_allGroups.length - 1][0]){
+        console.log('到头了，结束')
+        _allComplete=true;
+        // return;
       }
       // _maxid设置为最后一个获取的图片id，就可以往下继续刷新页面
-      _maxid = _allGroups[_allGroups.length - 1];
+      _maxid = _allGroups[_allGroups.length - 1][0];
       _allImagesCount = _allGroups.length;
-      console.log(_maxid);
-      console.log(_allGroups);
+      console.log('翻页的id是：'+_maxid);
+      console.log('翻页的图片是：'+_allGroups[_allGroups.length - 1][1]);
+      console.log('链接是：'+_url);
+      // console.log(_allGroups);
+      // 循环检测所有链接
+      loopGetAllImages();
       // downall(_allGroups);
     }
   });
