@@ -171,6 +171,7 @@ function checkUpdateId(__checkNewId) {
 function loopGetAllImages() {
   console.log(_allComplete);
 <<<<<<< HEAD
+<<<<<<< HEAD
   if (_allComplete != false) {
     console.log("读取图片完成！开始下载！");
     // 下载图片开始
@@ -191,6 +192,9 @@ function loopGetAllImages() {
 =======
   // 根据_allComplete 判断是否要循环
 >>>>>>> parent of c0a598c... 1
+=======
+  // 根据_allComplete 判断是否要循环
+>>>>>>> parent of c0a598c... 1
 }
 // 下载一批图片
 function downLoadSome(__url) {
@@ -200,6 +204,7 @@ function downLoadSome(__url) {
       var regExp = /"pin_id":(.*?),.+?"file_id":(.*?),.+?"file":\{.+?"key":(.*?),.+?"type":"image\/(.*?)"/g; //未使用g选项
       // 循环匹配出文字内容
       while ((res = regExp.exec(body))) {
+<<<<<<< HEAD
 <<<<<<< HEAD
         if (res[1] == _updateId) {
           console.log("====================================");
@@ -230,10 +235,17 @@ function downLoadSome(__url) {
         temparray.push(res[1], res[3].slice(1, -1), res[4]);
         _allGroups.push(temparray);
 >>>>>>> parent of c0a598c... 1
+=======
+        console.log(res.length);
+        var temparray = [];
+        temparray.push(res[1], res[3].slice(1, -1), res[4]);
+        _allGroups.push(temparray);
+>>>>>>> parent of c0a598c... 1
       }
       // _maxid设置为最后一个获取的图片id，就可以往下继续刷新页面
       _maxid = _allGroups[_allGroups.length - 1];
       _allImagesCount = _allGroups.length;
+<<<<<<< HEAD
 <<<<<<< HEAD
       console.log("翻页的id是：" + _maxid);
       console.log("翻页的图片是：" + _allGroups[_allGroups.length - 1][1]);
@@ -241,6 +253,10 @@ function downLoadSome(__url) {
       console.log(_allGroups);
       // 循环检测所有链接
       loopGetAllImages();
+=======
+      console.log(_maxid);
+      console.log(_allGroups);
+>>>>>>> parent of c0a598c... 1
 =======
       console.log(_maxid);
       console.log(_allGroups);
