@@ -31,7 +31,7 @@ var cheerio = require("cheerio");
 var Bagpipe = require("bagpipe");
 
 //画板的id
-var _board_id = "32813392";
+var _board_id = "35083";
 // 检查翻页的id
 var _maxid = "";
 // 每次打开的图片
@@ -49,8 +49,7 @@ var _url =
 // var imgList = [];
 
 var foldname = "images"; // = _board_id 需要根据画板id赋值 创建对应的文件夹
-// 硬盘路径 可以设置  /Users/meishijie/Documents/GitHub/electron-huaban  E:/图片搜藏/huaban
-// var GPATH = "/Users/meishijie/Documents/GitHub/electron-huaban/huaban";
+// 硬盘路径 可以设置
 var GPATH = "E:/图片搜藏/huaban";
 // 硬盘路径下的文件夹
 var _board_id_path = GPATH + "/" + _board_id;
@@ -163,13 +162,15 @@ function checkUpdateId(__checkNewId) {
       fs.writeFileSync(_board_id_path + "/update.txt", __checkNewId);
       console.log("创建id完成");
       // 先获取所有图片 定时器模式
-      loopGetAllImages();
+      setInterval(loopGetAllImages, 1500);
+      // loopGetAllImages();
     }
   });
 }
 //循环获取所有图片到 _allGroups
 function loopGetAllImages() {
   console.log(_allComplete);
+<<<<<<< HEAD
   if (_allComplete != false) {
     console.log("读取图片完成！开始下载！");
     // 下载图片开始
@@ -187,15 +188,19 @@ function loopGetAllImages() {
       "&wfl=1";
     getSomeAddr(_url);
   }
+=======
+  // 根据_allComplete 判断是否要循环
+>>>>>>> parent of c0a598c... 1
 }
 // 下载一批图片
-function getSomeAddr(__url) {
+function downLoadSome(__url) {
   //获取花瓣的网页代码
   request(__url, function(err, res, body) {
     if (!err && res.statusCode === 200) {
       var regExp = /"pin_id":(.*?),.+?"file_id":(.*?),.+?"file":\{.+?"key":(.*?),.+?"type":"image\/(.*?)"/g; //未使用g选项
       // 循环匹配出文字内容
       while ((res = regExp.exec(body))) {
+<<<<<<< HEAD
         if (res[1] == _updateId) {
           console.log("====================================");
           console.log("已经到更新的id了");
@@ -219,16 +224,27 @@ function getSomeAddr(__url) {
         console.log("到头了，结束");
         _allComplete = true;
         // return;
+=======
+        console.log(res.length);
+        var temparray = [];
+        temparray.push(res[1], res[3].slice(1, -1), res[4]);
+        _allGroups.push(temparray);
+>>>>>>> parent of c0a598c... 1
       }
       // _maxid设置为最后一个获取的图片id，就可以往下继续刷新页面
-      _maxid = _allGroups[_allGroups.length - 1][0];
+      _maxid = _allGroups[_allGroups.length - 1];
       _allImagesCount = _allGroups.length;
+<<<<<<< HEAD
       console.log("翻页的id是：" + _maxid);
       console.log("翻页的图片是：" + _allGroups[_allGroups.length - 1][1]);
       console.log("链接是：" + _url);
       console.log(_allGroups);
       // 循环检测所有链接
       loopGetAllImages();
+=======
+      console.log(_maxid);
+      console.log(_allGroups);
+>>>>>>> parent of c0a598c... 1
       // downall(_allGroups);
     }
   });
