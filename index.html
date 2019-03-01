@@ -1,19 +1,29 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Hello World!</title>
   </head>
-  <body>
-    <h1>中文</h1>
-    <!-- All of the Node.js APIs are available in this renderer process. -->
-    We are using Node.js <script>document.write(process.versions.node)</script>,
-    Chromium <script>document.write(process.versions.chrome)</script>,
-    and Electron <script>document.write(process.versions.electron)</script>.
 
+  <link
+    href="./node_modules/bootstrap/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <body>
+    <h1>Hello World!</h1>
+    <!-- All of the Node.js APIs are available in this renderer process. -->
+
+    <button type="button" class="btn btn-primary" id="select-directory">
+      Choose a directory
+    </button>
+    <textarea id="selectedItem" class="form-control" rows="3"></textarea>
+    <script>
+      window.$ = window.jQuery = require("./node_modules/jquery/dist/jquery.min.js");
+      require("./node_modules/bootstrap/dist/js/bootstrap.min.js");
+    </script>
     <script>
       // You can also require other files to run in this process
-      require('./renderer.js')
+      require("./renderer.js");
     </script>
   </body>
 </html>
