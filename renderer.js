@@ -31,7 +31,7 @@ var cheerio = require("cheerio");
 var Bagpipe = require("bagpipe");
 
 //画板的id
-var _board_id = "32813392";
+var _board_id = "";
 // 检查翻页的id
 var _maxid = "";
 // 每次打开的图片
@@ -75,9 +75,12 @@ var downloadPic = function(__src, __dest) {
     )
     .on("close", function() {
       _allcount++;
+      document.getElementById("selectedItem").innerHTML += `${__src}下载完成！`;
       console.log("保存了" + _allcount + "/" + _allImagesCount + "张图片");
       if (_allcount / _allImagesCount == 1) {
         console.log("下载完成了！");
+        selectDirBtn.disabled = false;
+        begin.disabled = false;
       }
     });
   // request(__src, { timeout: 7500 })
@@ -121,7 +124,7 @@ async function checkAndMakePath(__path) {
 // 下载所有图片
 function downall(__imgList) {
   // imgList =  [[pin_id,图片地址,文件格式]]
-  var bagpipe = new Bagpipe(10, { timeout: 7500 });
+  var bagpipe = new Bagpipe(3, { timeout: 7500 });
   for (var i = 0; i < __imgList.length; i++) {
     bagpipe.push(
       downloadPic,
@@ -145,6 +148,8 @@ function checkUpdateId(__checkNewId) {
         console.log(
           "没有需要更新的内容。保存的id为：" + _updateId + "/" + __checkNewId
         );
+        selectDirBtn.disabled = false;
+        begin.disabled = false;
         return;
       } else {
         // 有更新内容 需要限制更新的maxid
@@ -172,9 +177,16 @@ function loopGetAllImages() {
   console.log(_allComplete);
   if (_allComplete != false) {
     console.log("读取图片完成！开始下载！");
+    console.log(_allGroups.length);
     // 下载图片开始
-    downall(_allGroups);
-    return;
+    if (_allGroups.length > 0) {
+      console.log(_allGroups);
+      downall(_allGroups);
+    } else {
+      selectDirBtn.disabled = false;
+      begin.disabled = false;
+      return;
+    }
   } else {
     // 根据_allComplete 判断是否要循环
     _url =
@@ -195,46 +207,43 @@ function getSomeAddr(__url) {
     if (!err && res.statusCode === 200) {
       var regExp = /"pin_id":(.*?),.+?"file_id":(.*?),.+?"file":\{.+?"key":(.*?),.+?"type":"image\/(.*?)"/g; //未使用g选项
       // 循环匹配出文字内容
+      console.log(body);
       while ((res = regExp.exec(body))) {
-        if (res[1] == _updateId) {
-          console.log("====================================");
-          console.log("已经到更新的id了");
-          console.log(res[1]);
-          console.log(_updateId);
-          console.log("====================================");
+        console.log(res);
+        console.log(_updateId);
+        if (_updateId != "" && res[1] == _updateId) {
           _allComplete = true;
           // 匹配到和update.txt里的id相同的id号，说明已经读取完更新的图片了
           break;
         }
-        if (_allComplete == true) {
-          return;
-        }
+
         var temparray = [];
         temparray.push(res[1], res[3].slice(1, -1), res[4]);
         _allGroups.push(temparray);
-        console.log("数据是+++" + temparray);
-        console.log("测试是否出现");
+        // console.log("数据是+++" + temparray);
+        // console.log("测试是否出现");
       }
-      if (_maxid == _allGroups[_allGroups.length - 1][0]) {
-        console.log("到头了，结束");
+      if (_allGroups.length > 0) {
+        if (_maxid == _allGroups[_allGroups.length - 1][0]) {
+          console.log("到头了，结束");
+          _allComplete = true;
+        }
+        // _maxid设置为最后一个获取的图片id，就可以往下继续刷新页面
+        _maxid = _allGroups[_allGroups.length - 1][0];
+      } else {
         _allComplete = true;
-        // return;
       }
-      // _maxid设置为最后一个获取的图片id，就可以往下继续刷新页面
-      _maxid = _allGroups[_allGroups.length - 1][0];
       _allImagesCount = _allGroups.length;
-      console.log("翻页的id是：" + _maxid);
-      console.log("翻页的图片是：" + _allGroups[_allGroups.length - 1][1]);
-      console.log("链接是：" + _url);
-      console.log(_allGroups);
-      // 循环检测所有链接
-      loopGetAllImages();
-      // downall(_allGroups);
+      var mytimeout = setTimeout(() => {
+        clearTimeout(mytimeout);
+        loopGetAllImages();
+      }, 3000);
     }
   });
 }
 // 主入口函数
 function main() {
+  _allGroups = [];
   _updateId = "";
   _allComplete = false;
   _checkNewId = "";
@@ -261,10 +270,14 @@ function main() {
     if (!err && res.statusCode === 200) {
       var regExp = /"pin_id":(.*?),.+?"file_id":(.*?),.+?"file":\{.+?"key":(.*?),.+?"type":"image\/(.*?)"/g;
       res = regExp.exec(body);
-      // console.log(res[1]);
+      console.log(res);
       _checkNewId = res[1];
       // 检测是否有更新
-      checkUpdateId(_checkNewId);
+
+      var mytimeout = setTimeout(() => {
+        clearTimeout(mytimeout);
+        checkUpdateId(_checkNewId);
+      }, 3000);
     }
   });
 
@@ -301,12 +314,24 @@ function main() {
 
   //
 }
-// main();
+
 const ipc = require("electron").ipcRenderer;
 const selectDirBtn = document.getElementById("select-directory");
+const begin = document.getElementById("begin");
+const huabanID = document.getElementById("huabanID");
 selectDirBtn.addEventListener("click", function(event) {
   ipc.send("open-directory-dialog");
 });
+begin.addEventListener("click", function(event) {
+  console.log(document.getElementById("huabanID").value);
+  _board_id = document.getElementById("huabanID").value;
+  selectDirBtn.disabled = true;
+  begin.disabled = true;
+  main();
+});
 ipc.on("selectedItem", function(event, path) {
-  document.getElementById("selectedItem").innerHTML = `You selected: ${path}`;
+  GPATH = path[0];
+  console.log(GPATH);
+  selectDirBtn.disabled = true;
+  document.getElementById("selectedItem").innerHTML + `You selected: ${path}`;
 });

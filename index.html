@@ -13,10 +13,20 @@
     <h1>Hello World!</h1>
     <!-- All of the Node.js APIs are available in this renderer process. -->
 
+    <input
+      class="form-control"
+      type="text"
+      id="huabanID"
+      placeholder="画板id"
+      value="50025415"
+    />
     <button type="button" class="btn btn-primary" id="select-directory">
-      Choose a directory
+      选择目录
     </button>
     <textarea id="selectedItem" class="form-control" rows="3"></textarea>
+    <button type="button" class="btn btn-primary" id="begin">
+      开始下载
+    </button>
     <script>
       window.$ = window.jQuery = require("./node_modules/jquery/dist/jquery.min.js");
       require("./node_modules/bootstrap/dist/js/bootstrap.min.js");
