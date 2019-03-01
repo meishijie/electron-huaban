@@ -59,6 +59,7 @@ var _allcount = 0;
 // 一共要下载的图片
 var _allImagesCount = 0;
 var _allComplete = false;
+var _updateId = "";
 //
 //下载区
 // __src 图片地址
@@ -75,6 +76,9 @@ var downloadPic = function(__src, __dest) {
     .on("close", function() {
       _allcount++;
       console.log("保存了" + _allcount + "/" + _allImagesCount + "张图片");
+      if (_allcount / _allImagesCount == 1) {
+        console.log("下载完成了！");
+      }
     });
   // request(__src, { timeout: 7500 })
   //   .on("abort", function() {
@@ -117,7 +121,7 @@ async function checkAndMakePath(__path) {
 // 下载所有图片
 function downall(__imgList) {
   // imgList =  [[pin_id,图片地址,文件格式]]
-  var bagpipe = new Bagpipe(5, { timeout: 7500 });
+  var bagpipe = new Bagpipe(10, { timeout: 7500 });
   for (var i = 0; i < __imgList.length; i++) {
     bagpipe.push(
       downloadPic,
@@ -136,9 +140,22 @@ function checkUpdateId(__checkNewId) {
   // 如果不相等就直接写入这个id
   fs.exists(_board_id_path + "/update.txt", function(exists) {
     if (exists == true) {
-      let data = fs.readFileSync(_board_id_path + "/update.txt", "utf8");
-      console.log("没有更新！");
-      return;
+      _updateId = fs.readFileSync(_board_id_path + "/update.txt", "utf8");
+      if (_updateId == __checkNewId) {
+        console.log(
+          "没有需要更新的内容。保存的id为：" + _updateId + "/" + __checkNewId
+        );
+        return;
+      } else {
+        // 有更新内容 需要限制更新的maxid
+        // 需要限制读取的图片到 update.txt记录的id号
+        console.log(
+          `有最新加入的图片，需要更新.目标id为：${_updateId}，最新id为：${__checkNewId}`
+        );
+        loopGetAllImages();
+        fs.writeFileSync(_board_id_path + "/update.txt", __checkNewId);
+      }
+
       // var bytesRead = fs.readFileSync(_board_id_path + "/update.txt");
       // console.log(bytesRead);
     } else {
@@ -153,15 +170,23 @@ function checkUpdateId(__checkNewId) {
 //循环获取所有图片到 _allGroups
 function loopGetAllImages() {
   console.log(_allComplete);
-  if(_allComplete != false){
-    console.log('可以开始下载了！');
+  if (_allComplete != false) {
+    console.log("读取图片完成！开始下载！");
+    // 下载图片开始
+    downall(_allGroups);
     return;
-  }else{
+  } else {
     // 根据_allComplete 判断是否要循环
-    _url = "http://huaban.com/boards/" + _board_id +"/?max=" +_maxid +"&limit=" +_limit +"&wfl=1";
+    _url =
+      "http://huaban.com/boards/" +
+      _board_id +
+      "/?max=" +
+      _maxid +
+      "&limit=" +
+      _limit +
+      "&wfl=1";
     getSomeAddr(_url);
   }
-  
 }
 // 下载一批图片
 function getSomeAddr(__url) {
@@ -171,23 +196,37 @@ function getSomeAddr(__url) {
       var regExp = /"pin_id":(.*?),.+?"file_id":(.*?),.+?"file":\{.+?"key":(.*?),.+?"type":"image\/(.*?)"/g; //未使用g选项
       // 循环匹配出文字内容
       while ((res = regExp.exec(body))) {
+        if (res[1] == _updateId) {
+          console.log("====================================");
+          console.log("已经到更新的id了");
+          console.log(res[1]);
+          console.log(_updateId);
+          console.log("====================================");
+          _allComplete = true;
+          // 匹配到和update.txt里的id相同的id号，说明已经读取完更新的图片了
+          break;
+        }
+        if (_allComplete == true) {
+          return;
+        }
         var temparray = [];
         temparray.push(res[1], res[3].slice(1, -1), res[4]);
         _allGroups.push(temparray);
-        // console.log(temparray);
+        console.log("数据是+++" + temparray);
+        console.log("测试是否出现");
       }
-      if(_maxid==_allGroups[_allGroups.length - 1][0]){
-        console.log('到头了，结束')
-        _allComplete=true;
+      if (_maxid == _allGroups[_allGroups.length - 1][0]) {
+        console.log("到头了，结束");
+        _allComplete = true;
         // return;
       }
       // _maxid设置为最后一个获取的图片id，就可以往下继续刷新页面
       _maxid = _allGroups[_allGroups.length - 1][0];
       _allImagesCount = _allGroups.length;
-      console.log('翻页的id是：'+_maxid);
-      console.log('翻页的图片是：'+_allGroups[_allGroups.length - 1][1]);
-      console.log('链接是：'+_url);
-      // console.log(_allGroups);
+      console.log("翻页的id是：" + _maxid);
+      console.log("翻页的图片是：" + _allGroups[_allGroups.length - 1][1]);
+      console.log("链接是：" + _url);
+      console.log(_allGroups);
       // 循环检测所有链接
       loopGetAllImages();
       // downall(_allGroups);
@@ -196,6 +235,7 @@ function getSomeAddr(__url) {
 }
 // 主入口函数
 function main() {
+  _updateId = "";
   _allComplete = false;
   _checkNewId = "";
   _allcount = 0;
@@ -221,7 +261,7 @@ function main() {
     if (!err && res.statusCode === 200) {
       var regExp = /"pin_id":(.*?),.+?"file_id":(.*?),.+?"file":\{.+?"key":(.*?),.+?"type":"image\/(.*?)"/g;
       res = regExp.exec(body);
-      console.log(res[1]);
+      // console.log(res[1]);
       _checkNewId = res[1];
       // 检测是否有更新
       checkUpdateId(_checkNewId);
