@@ -4,7 +4,8 @@
   "description": "A minimal Electron application",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "package": "electron-packager ./ myapp --out ./OutApp --overwrite "
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
@@ -17,14 +18,17 @@
   "author": "GitHub",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "^4.0.6"
+    "electron": "^4.0.6",
+    "electron-packager": "^13.1.0"
   },
   "dependencies": {
     "bagpipe": "^0.3.5",
     "bootstrap": "^4.3.1",
     "cheerio": "^1.0.0-rc.2",
+    "fs-extra": "^5.0.0",
     "jquery": "^3.3.1",
     "popper.js": "^1.14.3",
+    "request": "^2.88.0",
     "superagent": "^4.1.0"
   }
 }
