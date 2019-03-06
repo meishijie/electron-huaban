@@ -14,7 +14,7 @@ var _maxid = "";
 // 每次请求打开的图片
 var _limit = 100;
 // 同时下载的数量
-var _downLoadMutiCout = 100;
+var _downLoadMutiCout = 30;
 // 完整拼合的地址
 var _url =
   "http://huaban.com/boards/" +
@@ -146,7 +146,7 @@ function checkUpdateId(__checkNewId) {
 }
 //循环获取所有图片到 _allGroups
 function loopGetAllImages() {
-  // console.log(_allComplete);
+  console.log(_allComplete);
   if (_allComplete != false) {
     document.getElementById("selectedItem").innerHTML =
       "读取图片完成！开始下载！";
@@ -186,9 +186,9 @@ function getSomeAddr(__url) {
     if (!err && res.statusCode === 200) {
       var regExp = /"pin_id":(.*?),.+?"file_id":(.*?),.+?"file":\{.+?"key":(.*?),.+?"type":"image\/(.*?)"/g; //未使用g选项
       // 循环匹配出文字内容
-      // console.log(body);
+      console.log(body);
       while ((res = regExp.exec(body))) {
-        // console.log(res);
+        console.log(res);
         // console.log(_updateId);
         if (_updateId != "" && res[1] == _updateId) {
           _allComplete = true;
@@ -211,6 +211,7 @@ function getSomeAddr(__url) {
         // console.log("数据是+++" + temparray);
         // console.log("测试是否出现");
       }
+      console.log(_allGroups.length);
       if (_allGroups.length > 0) {
         if (_maxid == _allGroups[_allGroups.length - 1][0]) {
           console.log("到头了，结束");
@@ -219,13 +220,20 @@ function getSomeAddr(__url) {
         // _maxid设置为最后一个获取的图片id，就可以往下继续刷新页面
         _maxid = _allGroups[_allGroups.length - 1][0];
       } else {
-        _allComplete = true;
+        $("#loading").css("visibility", "hidden");
+        $("#ale").html(`<strong>出现错误，删除${_board_id}后重试 ！！！</strong>`);
+        $("#ale").css("visibility", "visible"); //元素显示
+        selectDirBtn.disabled = false;
+        begin.disabled = false;
+        return;
+        // _allComplete = true;
       }
       _allImagesCount = _allGroups.length;
-      var mytimeout = setTimeout(() => {
-        clearTimeout(mytimeout);
-        loopGetAllImages();
-      }, 3000);
+      loopGetAllImages();
+      // var mytimeout = setTimeout(() => {
+      //   clearTimeout(mytimeout);
+      //   loopGetAllImages();
+      // }, 3000);
     }
   });
 }
