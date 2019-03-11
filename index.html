@@ -52,7 +52,7 @@
       <label>当前目录是：</label>
       <label id="GPATH"></label>
     </div>
-    <textarea id="selectedItem" class="form-control" rows="3"></textarea>
+    <textarea id="selectedItem" class="form-control" rows="5"></textarea>
     <button
       type="button"
       class="btn btn-primary"
@@ -64,7 +64,19 @@
     <button id="loading" class="btn btn-primary" type="button">
       <span class="spinner-border spinner-border-sm" role="status"></span>
     </button>
-
+    <div><label>下载错误: </label><label id="errorCount"> </label></div>
+    <div><label>下载进度</label></div>
+    <div class="progress">
+      <div
+        id="jindu"
+        class="progress-bar progress-bar-striped progress-bar-animated"
+        role="progressbar"
+        aria-valuenow="1"
+        aria-valuemin="1"
+        aria-valuemax="100"
+        style="width: 1%"
+      ></div>
+    </div>
     <!-- Button trigger modal -->
     <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
       读取图片
@@ -123,18 +135,7 @@
         </div>
       </div>
     </div>
-    <div><label>下载进度</label></div>
-    <div class="progress">
-      <div
-        id="jindu"
-        class="progress-bar progress-bar-striped progress-bar-animated"
-        role="progressbar"
-        aria-valuenow="1"
-        aria-valuemin="1"
-        aria-valuemax="100"
-        style="width: 1%"
-      ></div>
-    </div>
+    
     <script>
       window.$ = window.jQuery = require("./node_modules/jquery/dist/jquery.min.js");
       require("./node_modules/bootstrap/dist/js/bootstrap.min.js");

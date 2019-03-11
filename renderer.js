@@ -35,6 +35,8 @@ var GPATH = "";
 var _board_id_path = GPATH + "/" + _board_id;
 // 对下载的数量进行计数
 var _allcount = 0;
+// 对下载出错的进行计数
+var _allErrorCount = 0;
 // 一共要下载的图片
 var _allImagesCount = 0;
 var _allComplete = false;
@@ -54,17 +56,20 @@ var downloadPic = function(__src, __dest) {
     Connection: "keep-alive",
     // timeout: 10000
   };
-  const req = request1.get(__src).timeout({
-    response: 5000,  // Wait 5 seconds for the server to start sending,
-    deadline: 60000, // but allow 1 minute for the file to finish loading.
+  const req = request1.get(__src);
+  
+  req.timeout({
+    // response: 5000,  // Wait 5 seconds for the server to start sending,
+    deadline: 30000, // but allow 1 minute for the file to finish loading.
   }).on('end',()=>{
+    req.abort();
     _allcount++;
     // document.getElementById("selectedItem").innerHTML += `${__src}下载完成！`;
     let tempdiv = document.getElementById("jindu");
     tempdiv.innerHTML = `${_allcount}/${_allImagesCount}`;
     tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
     // 下载完成显示
-    if (_allImagesCount - _allcount == 0) {
+    if (_allcount + _allErrorCount == _allImagesCount) {
       tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
       selectDirBtn.disabled = false;
       begin.disabled = false;
@@ -73,76 +78,24 @@ var downloadPic = function(__src, __dest) {
       $("#ale").css("visibility", "visible"); //元素显示
     }
   }).on("error",(err)=>{
-    console.log(err);
+    req.abort();
+    _allErrorCount++;
+    document.getElementById("selectedItem").innerHTML += `${__src} /下载出错！`;
+    $("#errorCount").html(`<strong>${_allErrorCount}</strong>`);
+    let tempdiv = document.getElementById("jindu");
+    // 下载完成显示
+    if (_allcount + _allErrorCount == _allImagesCount) {
+      tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
+      selectDirBtn.disabled = false;
+      begin.disabled = false;
+      $("#loading").css("visibility", "hidden");
+      $("#ale").html("<strong>下载完成 ！！！</strong>");
+      $("#ale").css("visibility", "visible"); //元素显示
+    }
   })
   req.pipe(
     fs.createWriteStream(__dest)
   )
-  // .on("close",()=>{
-  //   console.log('保存完成！');
-  //   _allcount++;
-  //   // document.getElementById("selectedItem").innerHTML += `${__src}下载完成！`;
-  //   let tempdiv = document.getElementById("jindu");
-  //   tempdiv.innerHTML = `${_allcount}/${_allImagesCount}`;
-  //   tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
-  //   // 下载完成显示
-  //   if (_allImagesCount - _allcount == 0) {
-  //     tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
-  //     selectDirBtn.disabled = false;
-  //     begin.disabled = false;
-  //     $("#loading").css("visibility", "hidden");
-  //     $("#ale").html("<strong>下载完成 ！！！</strong>");
-  //     $("#ale").css("visibility", "visible"); //元素显示
-  //   }
-  // });
-  
-  // const stream = fs.createWriteStream(__dest);
-  // const req = request.get(__src);
-  // req.pipe(stream);
-  
-  // const req = request1.get(__src, i_headers);
-  // req.on('complete',()=>{
-  //   console.log('请求图片成功！')
-  // })
-  // req.on('error',(e)=>{
-  //   console.log('请求图片出错：'+e)
-  //   _allcount++;
-  //   document.getElementById("selectedItem").innerHTML += `<b>${__src}下载出错！<b>`;
-  //   let tempdiv = document.getElementById("jindu");
-  //   tempdiv.innerHTML = `${_allcount}/${_allImagesCount}`;
-  //   tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
-  //   // 下载完成显示
-  //   if (_allImagesCount - _allcount == 0) {
-  //     tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
-  //     selectDirBtn.disabled = false;
-  //     begin.disabled = false;
-  //     $("#loading").css("visibility", "hidden");
-  //     $("#ale").html("<strong>下载完成 ！！！</strong>");
-  //     $("#ale").css("visibility", "visible"); //元素显示
-  //   }
-  //   return;
-  // })
-  // req.pipe(
-  //     fs.createWriteStream(__dest).on("error", error => {
-  //       console.log("写入文件错误： ", error.message);
-  //     })
-  //   )
-  //   .on("close", function() {
-  //     _allcount++;
-  //     // document.getElementById("selectedItem").innerHTML += `${__src}下载完成！`;
-  //     let tempdiv = document.getElementById("jindu");
-  //     tempdiv.innerHTML = `${_allcount}/${_allImagesCount}`;
-  //     tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
-  //     // 下载完成显示
-  //     if (_allImagesCount - _allcount == 0) {
-  //       tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
-  //       selectDirBtn.disabled = false;
-  //       begin.disabled = false;
-  //       $("#loading").css("visibility", "hidden");
-  //       $("#ale").html("<strong>下载完成 ！！！</strong>");
-  //       $("#ale").css("visibility", "visible"); //元素显示
-  //     }
-  //   });
 };
 
 function checkAndMakePath(__path) {
@@ -214,7 +167,7 @@ function checkUpdateId(__checkNewId) {
 function loopGetAllImages() {
   console.log(_allComplete);
   if (_allComplete != false) {
-    document.getElementById("selectedItem").innerHTML =
+    document.getElementById("selectedItem").innerHTML +=
       "读取图片完成！开始下载！";
     $("#begin").html(`开始下载`);
     // 下载图片开始
@@ -253,9 +206,9 @@ function getSomeAddr(__url) {
     if (!err && res.statusCode === 200) {
       var regExp = /"pin_id":(.*?),.+?"file_id":(.*?),.+?"file":\{.+?"key":(.*?),.+?"type":"image\/(.*?)"/g; //未使用g选项
       // 循环匹配出文字内容
-      console.log(body);
+      // console.log(body);
       while ((res = regExp.exec(body))) {
-        console.log(res);
+        // console.log(res);
         // console.log(_updateId);
         if (_updateId != "" && res[1] == _updateId) {
           _allComplete = true;
@@ -311,6 +264,7 @@ function main() {
   _allComplete = false;
   _checkNewId = "";
   _allcount = 0;
+  _allErrorCount = 0;
   _allImagesCount = 0;
   //创建画板id的目录
   _board_id_path = GPATH + "/" + _board_id;
