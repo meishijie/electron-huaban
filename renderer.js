@@ -14,7 +14,7 @@ var _maxid = "";
 // 每次请求打开的图片
 var _limit = 50;
 // 同时下载的数量
-var _downLoadMutiCout = 20;
+var _downLoadMutiCout = 4;
 // 完整拼合的地址
 var _url =
   "http://huaban.com/boards/" +
