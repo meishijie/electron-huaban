@@ -1,5 +1,8 @@
 var fs = require("fs-extra");
 var request1 = require("superagent");
+var myasync = require('./myasync');
+
+
 // 检查是否有更新的id，就是画板的第一张图片id
 var _checkNewId = "";
 var _allGroups = [];
@@ -62,7 +65,7 @@ var downloadPic = function(__src, __dest) {
     // response: 5000,  // Wait 5 seconds for the server to start sending,
     deadline: 30000, // but allow 1 minute for the file to finish loading.
   }).on('end',()=>{
-    req.abort();
+    
     _allcount++;
     // document.getElementById("selectedItem").innerHTML += `${__src}下载完成！`;
     let tempdiv = document.getElementById("jindu");
@@ -79,6 +82,7 @@ var downloadPic = function(__src, __dest) {
     }
   }).on("error",(err)=>{
     req.abort();
+    _allcount--;
     _allErrorCount++;
     document.getElementById("selectedItem").innerHTML += `${__src} /下载出错！`;
     $("#errorCount").html(`<strong>${_allErrorCount}</strong>`);
@@ -201,12 +205,11 @@ function getSomeAddr(__url) {
     Accept: "application/json",
     timeout: 10000
   };
-  //获取花瓣的网页代码
-  request(__url, i_headers, function(err, res, body) {
-    if (!err && res.statusCode === 200) {
+
+
+  myasync.myget(__url).then((body)=>{
       var regExp = /"pin_id":(.*?),.+?"file_id":(.*?),.+?"file":\{.+?"key":(.*?),.+?"type":"image\/(.*?)"/g; //未使用g选项
       // 循环匹配出文字内容
-      // console.log(body);
       while ((res = regExp.exec(body))) {
         // console.log(res);
         // console.log(_updateId);
@@ -223,13 +226,10 @@ function getSomeAddr(__url) {
          * TODO: 这里可以设置显示读取的图片数量
          *
          */
-
         $("#begin").html(`读取图片：(${_allGroups.length})`);
         document.getElementById("selectedItem").innerHTML = `"读取了：${
           _allGroups.length
         }张图片"`;
-        // console.log("数据是+++" + temparray);
-        // console.log("测试是否出现");
       }
       console.log(_allGroups.length);
       if (_allGroups.length > 0) {
@@ -246,16 +246,67 @@ function getSomeAddr(__url) {
         selectDirBtn.disabled = false;
         begin.disabled = false;
         return;
-        // _allComplete = true;
       }
       _allImagesCount = _allGroups.length;
       loopGetAllImages();
-      // var mytimeout = setTimeout(() => {
-      //   clearTimeout(mytimeout);
-      //   loopGetAllImages();
-      // }, 3000);
-    }
-  });
+      
+  })
+
+  //获取花瓣的网页代码
+  // request(__url, i_headers, function(err, res, body) {
+  //   if (!err && res.statusCode === 200) {
+  //     var regExp = /"pin_id":(.*?),.+?"file_id":(.*?),.+?"file":\{.+?"key":(.*?),.+?"type":"image\/(.*?)"/g; //未使用g选项
+  //     // 循环匹配出文字内容
+  //     // console.log(body);
+  //     while ((res = regExp.exec(body))) {
+  //       // console.log(res);
+  //       // console.log(_updateId);
+  //       if (_updateId != "" && res[1] == _updateId) {
+  //         _allComplete = true;
+  //         // 匹配到和update.txt里的id相同的id号，说明已经读取完更新的图片了
+  //         break;
+  //       }
+  //       var temparray = [];
+  //       temparray.push(res[1], res[3].slice(1, -1), res[4]);
+  //       _allGroups.push(temparray);
+
+  //       /**
+  //        * TODO: 这里可以设置显示读取的图片数量
+  //        *
+  //        */
+
+  //       $("#begin").html(`读取图片：(${_allGroups.length})`);
+  //       document.getElementById("selectedItem").innerHTML = `"读取了：${
+  //         _allGroups.length
+  //       }张图片"`;
+  //       // console.log("数据是+++" + temparray);
+  //       // console.log("测试是否出现");
+  //     }
+  //     console.log(_allGroups.length);
+  //     if (_allGroups.length > 0) {
+  //       if (_maxid == _allGroups[_allGroups.length - 1][0]) {
+  //         console.log("到头了，结束");
+  //         _allComplete = true;
+  //       }
+  //       // _maxid设置为最后一个获取的图片id，就可以往下继续刷新页面
+  //       _maxid = _allGroups[_allGroups.length - 1][0];
+  //     } else {
+  //       $("#loading").css("visibility", "hidden");
+  //       $("#ale").html(`<strong>出现错误，删除${_board_id}后重试 ！！！</strong>`);
+  //       $("#ale").css("visibility", "visible"); //元素显示
+  //       selectDirBtn.disabled = false;
+  //       begin.disabled = false;
+  //       return;
+  //       // _allComplete = true;
+  //     }
+  //     _allImagesCount = _allGroups.length;
+  //     loopGetAllImages();
+  //     // var mytimeout = setTimeout(() => {
+  //     //   clearTimeout(mytimeout);
+  //     //   loopGetAllImages();
+  //     // }, 3000);
+  //   }
+  // });
 }
 // 主入口函数
 function main() {
