@@ -1,7 +1,7 @@
 var fs = require("fs-extra");
 var request1 = require("superagent");
 var myasync = require('./myasync');
-
+var path=require('path');
 
 // 检查是否有更新的id，就是画板的第一张图片id
 var _checkNewId = "";
@@ -17,7 +17,7 @@ var _maxid = "";
 // 每次请求打开的图片
 var _limit = 50;
 // 同时下载的数量
-var _downLoadMutiCout = 4;
+var _downLoadMutiCout = 100;
 // 完整拼合的地址
 var _url =
   "http://huaban.com/boards/" +
@@ -35,7 +35,7 @@ var foldname = "images"; // = _board_id 需要根据画板id赋值 创建对应�
 // var GPATH = "/Users/meishijie/Documents/GitHub/electron-huaban/huaban";
 var GPATH = "";
 // 硬盘路径下的文件夹
-var _board_id_path = GPATH + "/" + _board_id;
+var _board_id_path = path.join(GPATH , _board_id);;
 // 对下载的数量进行计数
 var _allcount = 0;
 // 对下载出错的进行计数
@@ -116,15 +116,33 @@ function checkAndMakePath(__path) {
 // 下载所有图片
 //
 function downall(__imgList) {
-  // imgList =  [[pin_id,图片地址,文件格式]]
+  // // imgList =  [[pin_id,图片地址,文件格式]]
   var bagpipe = new Bagpipe(_downLoadMutiCout, { timeout: 7500 });
   for (var i = 0; i < __imgList.length; i++) {
     bagpipe.push(
-      downloadPic,
-      "http://img.hb.aicdn.com/" + __imgList[i][1],
-      _board_id_path + "/" + __imgList[i][1] + "." + __imgList[i][2],
-      function() {
-        // console.log("保存了" + _allcount + "/" + _allImagesCount + "张图片");
+      // downloadPic,
+      // "http://img.hb.aicdn.com/" + __imgList[i][1],
+      // _board_id_path + "/" + __imgList[i][1] + "." + __imgList[i][2],
+      // function() {
+      //   // console.log("保存了" + _allcount + "/" + _allImagesCount + "张图片");
+      // }
+      myasync.mydown,".\\aria2\\aria2c -o "+__imgList[i][1] + "." + __imgList[i][2]+" -d "+_board_id_path+" http://img.hb.aicdn.com/"+ __imgList[i][1],function () {
+          console.log('执行了');
+          _allcount++;
+          // document.getElementById("selectedItem").innerHTML += `${__src}下载完成！`;
+          let tempdiv = document.getElementById("jindu");
+          tempdiv.innerHTML = `${_allcount}/${_allImagesCount}`;
+          tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
+          // 下载完成显示
+          if (_allcount + _allErrorCount == _allImagesCount) {
+            tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
+            selectDirBtn.disabled = false;
+            begin.disabled = false;
+            $("#loading").css("visibility", "hidden");
+            $("#ale").html("<strong>下载完成 ！！！</strong>");
+            $("#ale").css("visibility", "visible"); //元素显示
+          }
+
       }
     );
   }
@@ -318,7 +336,7 @@ function main() {
   _allErrorCount = 0;
   _allImagesCount = 0;
   //创建画板id的目录
-  _board_id_path = GPATH + "/" + _board_id;
+  _board_id_path = path.join(GPATH,_board_id);
   // 检查翻页的id
   _maxid = "";
   // 每次打开的图片
