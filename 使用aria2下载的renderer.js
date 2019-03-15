@@ -116,44 +116,41 @@ function checkAndMakePath(__path) {
 // 下载所有图片
 //
 function downall(__imgList) {
-
-  // console.log(__imgList,_board_id_path)
-  myasync.batchArr(__imgList,4,_board_id_path)
   // // imgList =  [[pin_id,图片地址,文件格式]]
-  // var bagpipe = new Bagpipe(_downLoadMutiCout, { timeout: 7500 });
-  // for (var i = 0; i < __imgList.length; i++) {
-  //   let t = " http://img.hb.aicdn.com/"+ __imgList[i][1] +'执行了';
-  //   bagpipe.push(
-  //     // downloadPic,
-  //     // "http://img.hb.aicdn.com/" + __imgList[i][1],
-  //     // _board_id_path + "/" + __imgList[i][1] + "." + __imgList[i][2],
-  //     // function() {
-  //     //   // console.log("保存了" + _allcount + "/" + _allImagesCount + "张图片");
-  //     // }
-  //     // 用下载工具aria2进行下载 更加稳定
-  //     myasync.mydown,".\\aria2\\aria2c -o "+__imgList[i][1] + "." + __imgList[i][2]+" -d "+_board_id_path+" http://img.hb.aicdn.com/"+ __imgList[i][1],function (tt) {
-  //         console.log(tt+'下载完成！');
-  //         _allcount++;
-  //         // document.getElementById("selectedItem").innerHTML += `${__src}下载完成！`;
-  //         let tempdiv = document.getElementById("jindu");
-  //         tempdiv.innerHTML = `${_allcount}/${_allImagesCount}`;
-  //         tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
-  //         // 下载完成显示
-  //         if (_allcount + _allErrorCount == _allImagesCount) {
-  //           tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
-  //           selectDirBtn.disabled = false;
-  //           begin.disabled = false;
-  //           $("#loading").css("visibility", "hidden");
-  //           $("#ale").html("<strong>下载完成 ！！！</strong>");
-  //           $("#ale").css("visibility", "visible"); //元素显示
-  //         }
+  var bagpipe = new Bagpipe(_downLoadMutiCout, { timeout: 7500 });
+  for (var i = 0; i < __imgList.length; i++) {
+    let t = " http://img.hb.aicdn.com/"+ __imgList[i][1] +'执行了';
+    bagpipe.push(
+      // downloadPic,
+      // "http://img.hb.aicdn.com/" + __imgList[i][1],
+      // _board_id_path + "/" + __imgList[i][1] + "." + __imgList[i][2],
+      // function() {
+      //   // console.log("保存了" + _allcount + "/" + _allImagesCount + "张图片");
+      // }
+      // 用下载工具aria2进行下载 更加稳定
+      myasync.mydown,".\\aria2\\aria2c -o "+__imgList[i][1] + "." + __imgList[i][2]+" -d "+_board_id_path+" http://img.hb.aicdn.com/"+ __imgList[i][1],function (tt) {
+          console.log(tt+'下载完成！');
+          _allcount++;
+          // document.getElementById("selectedItem").innerHTML += `${__src}下载完成！`;
+          let tempdiv = document.getElementById("jindu");
+          tempdiv.innerHTML = `${_allcount}/${_allImagesCount}`;
+          tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
+          // 下载完成显示
+          if (_allcount + _allErrorCount == _allImagesCount) {
+            tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
+            selectDirBtn.disabled = false;
+            begin.disabled = false;
+            $("#loading").css("visibility", "hidden");
+            $("#ale").html("<strong>下载完成 ！！！</strong>");
+            $("#ale").css("visibility", "visible"); //元素显示
+          }
 
-  //     }
-  //   );
+      }
+    );
 
-  // }
+  }
 
-
+  
 }
 
 

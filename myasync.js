@@ -99,47 +99,58 @@ async function mydown(__url,cb) {
     await cmdrun(__url,cb)
 }
 
-
-
 /**
  * 数组分批次下载
  */
 var request = require("request");
 
-async function go(__item) {
+async function go(__item,__dest,__fold) {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
-            // __cb(__item);
-            request(__item,{},function (error, response, body) {
+            
+            let tempuri = "http://img.hb.aicdn.com/" + __item;
+            let tempdest = __fold + "/" + __item + "." + __dest
+            let writeStream=fs.createWriteStream(tempdest,{autoClose:true})
+
+            request(tempuri,i_headers,function (error, response, body) {
                 if (!error & response.statusCode == 200) {
-                    resolve()
-                    console.log(__item+'下载完成') // 请求成功的处理逻辑
+                    console.log(__item+'下载完成，开始保存到硬盘！') // 请求成功的处理逻辑
                 }else{
+                    reject();
                     console.log(error);
                     
                 }
-            })                    
-            
+            }).pipe(writeStream)
+            writeStream.on('finish',function(){
+                resolve()
+                console.log(__item+'文件写入成功')
+            })
         }, 3000); 
      });
 }
 
-// 批量执行数组
-async function batchArr(__arr,__sp){
+// 批量执行数组 
+/**
+ * @param {[],[]} __arr  2 维数组
+ * @param {Number} __sp 每份分割数
+ */
+async function batchArr(__arr,__sp,__fold){
+    console.log(__arr,__sp)
     if(__arr == undefined || __arr.length == 0 || __sp == undefined) return;
     for(var j = 0;j<Math.ceil(__arr.length/__sp);j++){
         let temparr= [];
         for(var i=__sp*j;i<__sp*j+__sp;i++){
             if(__arr[i]==undefined) return
-            temparr.push(go(__arr[i]))
+            // __arr[i][0] 图片地址   __arr[i][1]硬盘存放地址
+            console.log(__arr[i][1],__arr[i][2],__fold)
+            temparr.push(go(__arr[i][1],__arr[i][2],__fold))
         }
         await Promise.all(temparr)
-        // console.log('一批完成');
+        console.log('一批完成');
     }
 }
+
+
 module.exports.batchArr = batchArr;
 module.exports.mydown = cmdrun;
 module.exports.myget = myget;
-// get("https://www.baidu.com/").then((body)=>{
-//     console.log(body)
-// })
