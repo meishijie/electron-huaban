@@ -53,17 +53,31 @@
       <label id="GPATH"></label>
     </div>
     <textarea id="selectedItem" class="form-control" rows="5"></textarea>
-    <button
-      type="button"
-      class="btn btn-primary"
-      id="begin"
-      style="margin:10px 0;"
-    >
-      开始下载
-    </button>
-    <button id="loading" class="btn btn-primary" type="button">
-      <span class="spinner-border spinner-border-sm" role="status"></span>
-    </button>
+    <div style="margin:0;" class="form-inline">
+        <button
+          type="button"
+          class="btn btn-primary"
+          id="begin"
+          style="margin:10px 0;"
+        >
+          开始下载
+        </button>
+        <button id="loading" class="btn btn-primary" type="button">
+          <span class="spinner-border spinner-border-sm" role="status"></span>
+        </button>
+        <!-- <label>设置同时下载数量：</label>
+          <input
+          type="text"
+          class="form-control"
+          aria-label="Small"
+          aria-describedby="inputGroup-sizing-sm"
+          id="_downLoadMutiCout"
+          placeholder=""
+          value="10"
+        /> -->
+      </div>
+    </div>
+    
     <div><label>下载错误: </label><label id="errorCount"> </label></div>
     <div><label>下载进度</label></div>
     <div class="progress">
@@ -74,7 +88,7 @@
         aria-valuenow="1"
         aria-valuemin="1"
         aria-valuemax="100"
-        style="width: 1%"
+        style="width: 0%"
       ></div>
     </div>
     <!-- Button trigger modal -->

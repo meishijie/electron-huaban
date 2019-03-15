@@ -17,7 +17,7 @@ var _maxid = "";
 // 每次请求打开的图片
 var _limit = 50;
 // 同时下载的数量
-var _downLoadMutiCout = 100;
+var _downLoadMutiCout = 10;
 // 完整拼合的地址
 var _url =
   "http://huaban.com/boards/" +
@@ -119,6 +119,7 @@ function downall(__imgList) {
   // // imgList =  [[pin_id,图片地址,文件格式]]
   var bagpipe = new Bagpipe(_downLoadMutiCout, { timeout: 7500 });
   for (var i = 0; i < __imgList.length; i++) {
+    let t = " http://img.hb.aicdn.com/"+ __imgList[i][1] +'执行了';
     bagpipe.push(
       // downloadPic,
       // "http://img.hb.aicdn.com/" + __imgList[i][1],
@@ -126,8 +127,9 @@ function downall(__imgList) {
       // function() {
       //   // console.log("保存了" + _allcount + "/" + _allImagesCount + "张图片");
       // }
-      myasync.mydown,".\\aria2\\aria2c -o "+__imgList[i][1] + "." + __imgList[i][2]+" -d "+_board_id_path+" http://img.hb.aicdn.com/"+ __imgList[i][1],function () {
-          console.log('执行了');
+      // 用下载工具aria2进行下载 更加稳定
+      myasync.mydown,".\\aria2\\aria2c -o "+__imgList[i][1] + "." + __imgList[i][2]+" -d "+_board_id_path+" http://img.hb.aicdn.com/"+ __imgList[i][1],function (tt) {
+          console.log(tt+'下载完成！');
           _allcount++;
           // document.getElementById("selectedItem").innerHTML += `${__src}下载完成！`;
           let tempdiv = document.getElementById("jindu");
@@ -145,8 +147,13 @@ function downall(__imgList) {
 
       }
     );
+
   }
+
+  
 }
+
+
 // 新建和读取文档的第一张图id
 function checkUpdateId(__checkNewId) {
   //同步方法 判断是否有txt
@@ -388,6 +395,7 @@ selectDirBtn.addEventListener("click", function(event) {
 });
 begin.addEventListener("click", function(event) {
   _board_id = document.getElementById("huabanID").value;
+  
   if (GPATH != "" && _board_id != "") {
     selectDirBtn.disabled = true;
     begin.disabled = true;
