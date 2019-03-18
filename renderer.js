@@ -116,9 +116,23 @@ function checkAndMakePath(__path) {
 // 下载所有图片
 //
 function downall(__imgList) {
-
-  // console.log(__imgList,_board_id_path)
-  myasync.batchArr(__imgList,4,_board_id_path)
+  myasync.batchArr(__imgList,4,_board_id_path,function (tt) {
+    console.log(tt+'下载完成！');
+    _allcount++;
+    // document.getElementById("selectedItem").innerHTML += `${__src}下载完成！`;
+    let tempdiv = document.getElementById("jindu");
+    tempdiv.innerHTML = `${_allcount}/${_allImagesCount}`;
+    tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
+    // 下载完成显示
+    if (_allcount + _allErrorCount == _allImagesCount) {
+      tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
+      selectDirBtn.disabled = false;
+      begin.disabled = false;
+      $("#loading").css("visibility", "hidden");
+      $("#ale").html("<strong>下载完成 ！！！</strong>");
+      $("#ale").css("visibility", "visible"); //元素显示
+    }
+  })
   // // imgList =  [[pin_id,图片地址,文件格式]]
   // var bagpipe = new Bagpipe(_downLoadMutiCout, { timeout: 7500 });
   // for (var i = 0; i < __imgList.length; i++) {

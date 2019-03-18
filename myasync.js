@@ -1,6 +1,6 @@
 var async = require('async');
 var request = require("request");
-
+var fs = require("fs")
 /*
 同步的方法读取一个链接
 */
@@ -11,7 +11,7 @@ i_headers = {
     // Connection: "keep-alive",
     Host: "huaban.com",
     Accept: "application/json",
-    timeout: 10000
+    timeout: 7500
   };
 async function getHtml(__src){
     return new Promise((resolve, reject) => {
@@ -76,9 +76,6 @@ async function cmdrun(__url,cb) {
         //     console.log('5秒了');
         //     reject();
         // }, 5000);
-
-        
-
         exec(__url,  { encoding: 'buffer' },function(err,stdout,stderr){
             if(err) {
                 console.log('stderr:', iconv.decode(stderr, 'cp936'));
@@ -101,31 +98,83 @@ async function mydown(__url,cb) {
 
 /**
  * 数组分批次下载
+ * todo: 可能存在传输数据超时的问题
  */
 var request = require("request");
 
-async function go(__item,__dest,__fold) {
+async function go(__item,__dest,__fold,__callback) {
     return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            
-            let tempuri = "http://img.hb.aicdn.com/" + __item;
-            let tempdest = __fold + "/" + __item + "." + __dest
-            let writeStream=fs.createWriteStream(tempdest,{autoClose:true})
+        let req;
+        try {
+                let tempuri = "http://img.hb.aicdn.com/" + __item;
+                let tempdest = __fold + "/" + __item + "." + __dest
+                let writeStream=fs.createWriteStream(tempdest,{autoClose:true})
 
-            request(tempuri,i_headers,function (error, response, body) {
-                if (!error & response.statusCode == 200) {
-                    console.log(__item+'下载完成，开始保存到硬盘！') // 请求成功的处理逻辑
-                }else{
-                    reject();
+                // request(tempuri,i_headers,function (error, response, body) {
+                //     if (!error & response.statusCode == 200) {
+                //         console.log(__item+'下载完成，开始保存到硬盘！') // 请求成功的处理逻辑
+                //     }else{
+                //         reject();
+                //         console.log(error);
+                //     }
+                // }).pipe(writeStream)
+
+                req = request(tempuri,i_headers,function (error, response, body) {
+                    if (!error & response.statusCode == 200) {
+                        clearTimeout(t);
+                        console.log(__item+'下载完成，开始保存到硬盘！') // 请求成功的处理逻辑
+                    }else{
+                        req.abort();
+                        req.destroy();
+                        clearTimeout(t);
+                        resolve();
+                        //reject 会引起整体过程不前进 
+                        reject();
+                        console.log(error);
+                    }
+                })
+                req.on('end', function(response) {
+                    req.abort();
+                    req.destroy();
+                    clearTimeout(t);
+                    console.log('读取图片成功');
+                    writeStream.end();
+                });
+                req.on('error', function(error) {
+                    req.abort();
+                    req.destroy();
+                    clearTimeout(t);
                     console.log(error);
-                    
-                }
-            }).pipe(writeStream)
-            writeStream.on('finish',function(){
-                resolve()
-                console.log(__item+'文件写入成功')
-            })
-        }, 3000); 
+                    //reject 会引起整体过程不前进 
+                    resolve();
+                    writeStream.end();
+                });
+                req.pipe(writeStream)
+                writeStream.on('finish',function(){
+                    req.abort();
+                    req.destroy();
+                    clearTimeout(t);
+                    __callback(__item);
+                    resolve();
+                    console.log(__item+'文件写入成功')
+                })
+        } catch (error) {
+                console.log(error);      
+                req.abort();
+                req.destroy();   
+                clearTimeout(t);   
+                resolve();
+                //reject 会引起整体过程不前进 
+                // reject(error);
+        }
+        let t = setTimeout(() => {
+            console.log('超时错误');
+            req.abort();
+            req.destroy();
+            resolve('超时');
+            //reject 会引起整体过程不前进 
+            // reject('超时');            
+        }, 7500); 
      });
 }
 
@@ -134,7 +183,7 @@ async function go(__item,__dest,__fold) {
  * @param {[],[]} __arr  2 维数组
  * @param {Number} __sp 每份分割数
  */
-async function batchArr(__arr,__sp,__fold){
+async function batchArr(__arr,__sp,__fold,__callback){
     console.log(__arr,__sp)
     if(__arr == undefined || __arr.length == 0 || __sp == undefined) return;
     for(var j = 0;j<Math.ceil(__arr.length/__sp);j++){
@@ -143,7 +192,7 @@ async function batchArr(__arr,__sp,__fold){
             if(__arr[i]==undefined) return
             // __arr[i][0] 图片地址   __arr[i][1]硬盘存放地址
             console.log(__arr[i][1],__arr[i][2],__fold)
-            temparr.push(go(__arr[i][1],__arr[i][2],__fold))
+            temparr.push(go(__arr[i][1],__arr[i][2],__fold,__callback))
         }
         await Promise.all(temparr)
         console.log('一批完成');
