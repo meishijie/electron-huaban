@@ -116,7 +116,6 @@ function checkAndMakePath(__path) {
 //
 function downall(__imgList) {
   myasync.batchArr(__imgList, 4, _board_id_path, function (tt) {
-    console.log(tt + '下载完成！');
     if (tt == 'error') {
       _allcount--;
       _allErrorCount++;
@@ -126,6 +125,7 @@ function downall(__imgList) {
       let tempdiv = document.getElementById("jindu");
       tempdiv.innerHTML = `${_allcount}/${_allImagesCount}`;
       tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
+      ipc.send("task-progress", _allcount / _allImagesCount);
       // 下载完成显示
       if (_allcount + _allErrorCount >= _allImagesCount) {
         tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
@@ -142,6 +142,7 @@ function downall(__imgList) {
     let tempdiv = document.getElementById("jindu");
     tempdiv.innerHTML = `${_allcount}/${_allImagesCount}`;
     tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
+    ipc.send("task-progress", _allcount / _allImagesCount);
     // 下载完成显示
     if (_allcount + _allErrorCount == _allImagesCount) {
       tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
