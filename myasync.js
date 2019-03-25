@@ -91,57 +91,58 @@ let options = {
 }
 
 const aria2 = new Aria2([options]);
-
+var temparr = [];
+var a = 0;
+var _callback;
+aria2.open()
+        .then(() => console.log("open"))
+        .catch(err => console.log("error", err));
+aria2.on("onDownloadComplete", (params) => {
+    a ++;
+    console.log('a:', a)
+    _callback()
+    if (a == temparr.length){
+        console.log('结束');
+        // aria2.close();
+        return
+    }
+})
 async function aria2All(__arr, __sp, __fold, __callback) {
-    var temparr = [];
+    temparr = [];
+    a = 0;
+    _callback = __callback
+    
     if (__arr == undefined || __arr.length == 0 || __sp == undefined) return;
-
+    
     for (var j = 0; j < Math.ceil(__arr.length / __sp); j++) {
         // temparr = [];
         for (var i = __sp * j; i < __sp * j + __sp; i++) {
             console.log('ok');
 
-            if (__arr[i] == undefined) {
-                aria2
-                    .open()
-                    .then(() => console.log("open"))
-                    .catch(err => console.log("error", err));
-                aria2.batch(temparr);
-                aria2.on("onDownloadComplete", (params) => {
-                    console.log('aria2', params)
-                    __callback(aria2)
-                })
-                return;
-            }
-            // __arr[i][0] 图片地址   __arr[i][1]硬盘存放地址
-            // console.log(__arr[i][1], __arr[i][2], __fold);
-            // aria2get(__arr[i][1], __arr[i][2], __fold, __callback)
-            temparr.push(["addUri", ["http://img.hb.aicdn.com/" + __arr[i][1]],
-                {
-                    dir: __fold,
-                    out: __arr[i][1] + "." + __arr[i][2]
-                }
-            ]);
+            if (__arr[i] != undefined) {                
+                temparr.push(["addUri", ["http://img.hb.aicdn.com/" + __arr[i][1]],
+                    {
+                        dir: __fold,
+                        out: __arr[i][1] + "." + __arr[i][2]
+                    }
+                ]);
+            }            
         }
     }
-    aria2
-        .open()
-        .then(() => console.log("open"))
-        .catch(err => console.log("error", err));
-    aria2.batch(temparr);
-    aria2.on("onDownloadComplete", (params) => {
-        console.log('aria2', params)
-        __callback(aria2)
-    })
-
-
-
-    // aria2.multicall(temparr);
-    // aria2.on("onDownloadComplete", () => {
-    //     console.log('结束');
-    //     __callback();
-    // })
+    
+    const results = await aria2.multicall(temparr);
+    console.log(results)
 }
+
+// aria2.on("onDownloadComplete", (params) => {
+//     a ++;
+//     console.log('a:', a)
+//     __callback(aria2)
+//     if (a == temparr.length){
+//         console.log('结束');
+//         return
+//     }
+// })
 
 async function gogo(__arr) {
     new Promise((resolve, reject) => {
