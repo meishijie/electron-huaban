@@ -111,11 +111,14 @@ function checkAndMakePath(__path) {
   }
 }
 
+const Aria2 = require("aria2");
 //
 // 下载所有图片
 //
 function downall(__imgList) {
-  myasync.batchArr(__imgList, 4, _board_id_path, function (tt) {
+  myasync.aria2All(__imgList, 4, _board_id_path, function (tt) {
+
+
     if (tt == 'error') {
       _allcount--;
       _allErrorCount++;
@@ -145,6 +148,7 @@ function downall(__imgList) {
     ipc.send("task-progress", _allcount / _allImagesCount);
     // 下载完成显示
     if (_allcount + _allErrorCount == _allImagesCount) {
+      tt.close();
       tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
       selectDirBtn.disabled = false;
       begin.disabled = false;

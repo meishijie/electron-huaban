@@ -51,27 +51,7 @@ const wait = (ms, url, cb) =>
 // var cmdStr = "D:\\下载\\aria2\\aria2c -o j.jpg -d downloads https://hbimg.b0.upaiyun.com/5a776d6452c68cbb2b0add52d2006e358712f208a5451-M4ZlHg_fw658 ";
 
 async function cmdrun(__url, cb) {
-    // return new Promise((resolve, reject) => {
-    // console.log(__url+'开始');
-    // await exec(__url);
-    // console.log(__url+'运行');
-    // wait(3000,__url,cb);
-
-    // myexe.then((result) => {
-    //     cb();
-    //     resolve();
-    // }).catch((err) => {
-    //     console.log('stderr:', iconv.decode(err, 'cp936'));
-    //     reject();
-    // });
-    // console.log('stdout:', stdout);
-    // console.log('stderr:', stderr);
     return new Promise((resolve, reject) => {
-        // var tt = setTimeout(() => {
-        //     exec("exit");
-        //     console.log('5秒了');
-        //     reject();
-        // }, 5000);
         exec(__url, {
             encoding: "buffer"
         }, function (err, stdout, stderr) {
@@ -92,6 +72,84 @@ async function cmdrun(__url, cb) {
 async function mydown(__url, cb) {
     await cmdrun(__url, cb);
 }
+
+
+const Aria2 = require("aria2");
+/**
+ * 使用aria2下载图片
+ * @param {*} __arr 图片数组地址
+ * @param {*} __sp 每批次同时下载数量
+ * @param {*} __fold 下载到哪个文件夹
+ * @param {*} __callback 下载完回调
+ */
+let options = {
+    host: 'localhost',
+    port: 6800,
+    secure: false,
+    secret: '',
+    path: '/jsonrpc'
+}
+
+const aria2 = new Aria2([options]);
+
+async function aria2All(__arr, __sp, __fold, __callback) {
+    var temparr = [];
+    if (__arr == undefined || __arr.length == 0 || __sp == undefined) return;
+
+    for (var j = 0; j < Math.ceil(__arr.length / __sp); j++) {
+        // temparr = [];
+        for (var i = __sp * j; i < __sp * j + __sp; i++) {
+            console.log('ok');
+
+            if (__arr[i] == undefined) {
+                aria2
+                    .open()
+                    .then(() => console.log("open"))
+                    .catch(err => console.log("error", err));
+                aria2.batch(temparr);
+                aria2.on("onDownloadComplete", (params) => {
+                    console.log('aria2', params)
+                    __callback(aria2)
+                })
+                return;
+            }
+            // __arr[i][0] 图片地址   __arr[i][1]硬盘存放地址
+            // console.log(__arr[i][1], __arr[i][2], __fold);
+            // aria2get(__arr[i][1], __arr[i][2], __fold, __callback)
+            temparr.push(["addUri", ["http://img.hb.aicdn.com/" + __arr[i][1]],
+                {
+                    dir: __fold,
+                    out: __arr[i][1] + "." + __arr[i][2]
+                }
+            ]);
+        }
+    }
+    aria2
+        .open()
+        .then(() => console.log("open"))
+        .catch(err => console.log("error", err));
+    aria2.batch(temparr);
+    aria2.on("onDownloadComplete", (params) => {
+        console.log('aria2', params)
+        __callback(aria2)
+    })
+
+
+
+    // aria2.multicall(temparr);
+    // aria2.on("onDownloadComplete", () => {
+    //     console.log('结束');
+    //     __callback();
+    // })
+}
+
+async function gogo(__arr) {
+    new Promise((resolve, reject) => {
+
+    });
+
+}
+
 
 /**
  * 数组分批次下载
@@ -217,6 +275,7 @@ async function batchArr(__arr, __sp, __fold, __callback) {
     }
 }
 
+module.exports.aria2All = aria2All;
 module.exports.batchArr = batchArr;
 module.exports.mydown = cmdrun;
 module.exports.myget = myget;
