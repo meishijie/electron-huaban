@@ -1,9 +1,5 @@
 // Modules to control application life and create native browser window
-const {
-  app,
-  BrowserWindow,
-  dialog
-} = require("electron");
+const { app, BrowserWindow, dialog } = require("electron");
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -11,11 +7,14 @@ let mainWindow;
 const ipc = require("electron").ipcMain;
 const ipcr = require("electron").ipcRenderer;
 const _dialog = dialog;
-ipc.on("open-directory-dialog", function (event) {
-  _dialog.showOpenDialog({
+ipc.on("open-directory-dialog", function(event) {
+  // childPid.kill((signal = "SIGTERM"));
+
+  _dialog.showOpenDialog(
+    {
       properties: ["openDirectory"]
     },
-    function (files) {
+    function(files) {
       if (files) {
         console.log("====================================");
         console.log(files[0]);
@@ -27,7 +26,7 @@ ipc.on("open-directory-dialog", function (event) {
 });
 
 // win.setProgressBar(0.5);
-ipc.on("task-progress", function (event, cout) {
+ipc.on("task-progress", function(event, cout) {
   mainWindow.setProgressBar(cout);
 });
 
@@ -35,14 +34,15 @@ ipc.on("task-progress", function (event, cout) {
  * 生成线程
  */
 const util = require("util");
-const exec = require("child_process").exec
+const _exec = require("child_process").exec;
 // const exec = util.promisify(require("child_process").exec);
 let childPid;
 
 async function createWindow() {
-
   // 运行aria2的cmd命令
-  childPid = exec(".\\aria2\\aria2c --enable-rpc --rpc-listen-all=true --rpc-allow-origin-all")
+  childPid = _exec(
+    ".\\aria2\\aria2c --enable-rpc --rpc-listen-all=true --rpc-allow-origin-all"
+  );
 
   // Create the browser window.
   mainWindow = new BrowserWindow({
@@ -58,7 +58,7 @@ async function createWindow() {
 
   // mainWindow.webContents.openDevTools();
   // Emitted when the window is closed.
-  mainWindow.on("closed", function () {
+  mainWindow.on("closed", function() {
     // Dereference the window object, usually you would store windows
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
@@ -72,16 +72,24 @@ async function createWindow() {
 app.on("ready", createWindow);
 
 // Quit when all windows are closed.
-app.on("window-all-closed", function () {
+app.on("window-all-closed", function() {
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
+  // 关闭aria2的线程 再全部退出
   if (process.platform !== "darwin") {
-    app.quit();
+    _exec("tasklist | findstr aria2c.exe", (err, stdout, stderr) => {
+      // stdout.split("\n").filter(function(line) {
+      console.log(stdout);
+      let t = /[1-9]\d* Console/.exec(stdout);
+      console.log(t[0].split(/ Console/)[0]);
+      process.kill(t[0].split(/ Console/)[0]);
+      app.quit();
+      // });
+    });
   }
 });
 
-app.on("activate", function () {
-
+app.on("activate", function() {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) {
