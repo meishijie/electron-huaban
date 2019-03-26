@@ -95,15 +95,14 @@ var temparr = [];
 var a = 0;
 var _callback;
 aria2.open()
-        .then(() => console.log("open"))
-        .catch(err => console.log("error", err));
+    .then(() => console.log("open"))
+    .catch(err => console.log("error", err));
 aria2.on("onDownloadComplete", (params) => {
-    a ++;
-    console.log('a:', a)
+    a++;
     _callback()
-    if (a == temparr.length){
+    // console.log(params);
+    if (a == temparr.length) {
         console.log('结束');
-        // aria2.close();
         return
     }
 })
@@ -111,44 +110,26 @@ async function aria2All(__arr, __sp, __fold, __callback) {
     temparr = [];
     a = 0;
     _callback = __callback
-    
-    if (__arr == undefined || __arr.length == 0 || __sp == undefined) return;
-    
-    for (var j = 0; j < Math.ceil(__arr.length / __sp); j++) {
-        // temparr = [];
-        for (var i = __sp * j; i < __sp * j + __sp; i++) {
-            console.log('ok');
 
-            if (__arr[i] != undefined) {                
+    if (__arr == undefined || __arr.length == 0 || __sp == undefined) return;
+    for (var j = 0; j < Math.ceil(__arr.length / __sp); j++) {
+        temparr = [];
+        for (var i = __sp * j; i < __sp * j + __sp; i++) {
+            if (__arr[i] != undefined) {
                 temparr.push(["addUri", ["http://img.hb.aicdn.com/" + __arr[i][1]],
                     {
                         dir: __fold,
                         out: __arr[i][1] + "." + __arr[i][2]
                     }
                 ]);
-            }            
+            }
         }
+        const results = await aria2.multicall(temparr);
+        // console.log(results);
     }
-    
-    const results = await aria2.multicall(temparr);
-    console.log(results)
-}
-
-// aria2.on("onDownloadComplete", (params) => {
-//     a ++;
-//     console.log('a:', a)
-//     __callback(aria2)
-//     if (a == temparr.length){
-//         console.log('结束');
-//         return
-//     }
-// })
-
-async function gogo(__arr) {
-    new Promise((resolve, reject) => {
-
-    });
-
+    // console.log(temparr);
+    // const results = await aria2.multicall(temparr);
+    // console.log(results)
 }
 
 
@@ -261,18 +242,18 @@ async function go(__item, __dest, __fold, __callback) {
  * @param {Number} __sp 每份分割数
  */
 async function batchArr(__arr, __sp, __fold, __callback) {
-    console.log(__arr, __sp);
+    // console.log(__arr, __sp);
     if (__arr == undefined || __arr.length == 0 || __sp == undefined) return;
     for (var j = 0; j < Math.ceil(__arr.length / __sp); j++) {
         let temparr = [];
         for (var i = __sp * j; i < __sp * j + __sp; i++) {
             if (__arr[i] == undefined) return;
             // __arr[i][0] 图片地址   __arr[i][1]硬盘存放地址
-            console.log(__arr[i][1], __arr[i][2], __fold);
+            // console.log(__arr[i][1], __arr[i][2], __fold);
             temparr.push(go(__arr[i][1], __arr[i][2], __fold, __callback));
         }
         await Promise.all(temparr);
-        console.log("一批完成");
+        // console.log("一批完成");
     }
 }
 

@@ -31,8 +31,19 @@ ipc.on("task-progress", function (event, cout) {
   mainWindow.setProgressBar(cout);
 });
 
+/**
+ * 生成线程
+ */
+const util = require("util");
+const exec = require("child_process").exec
+// const exec = util.promisify(require("child_process").exec);
+let childPid;
 
-function createWindow() {
+async function createWindow() {
+
+  // 运行aria2的cmd命令
+  childPid = exec(".\\aria2\\aria2c --enable-rpc --rpc-listen-all=true --rpc-allow-origin-all")
+
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 960,
@@ -70,6 +81,7 @@ app.on("window-all-closed", function () {
 });
 
 app.on("activate", function () {
+
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) {

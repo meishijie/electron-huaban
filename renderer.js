@@ -120,7 +120,6 @@ function downall(__imgList) {
     if (tt == 'error') {
       _allcount--;
       _allErrorCount++;
-
       let temperr = document.getElementById("errorCount");
       temperr.innerText = _allErrorCount;
       let tempdiv = document.getElementById("jindu");
@@ -146,7 +145,6 @@ function downall(__imgList) {
     ipc.send("task-progress", _allcount / _allImagesCount);
     // 下载完成显示
     if (_allcount + _allErrorCount == _allImagesCount) {
-      
       tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
       selectDirBtn.disabled = false;
       begin.disabled = false;
