@@ -35,7 +35,7 @@ var foldname = "images"; // = _board_id 需要根据画板id赋值 创建对应�
 // var GPATH = "/Users/meishijie/Documents/GitHub/electron-huaban/huaban";
 var GPATH = "";
 // 硬盘路径下的文件夹
-var _board_id_path = path.join(GPATH, _board_id);;
+var _board_id_path = path.join(GPATH, _board_id);
 // 对下载的数量进行计数
 var _allcount = 0;
 // 对下载出错的进行计数
@@ -71,7 +71,7 @@ var downloadPic = function (__src, __dest) {
     tempdiv.innerHTML = `${_allcount}/${_allImagesCount}`;
     tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
     // 下载完成显示
-    if (_allcount + _allErrorCount == _allImagesCount) {
+    if (_allcount + _allErrorCount === _allImagesCount) {
       tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
       selectDirBtn.disabled = false;
       begin.disabled = false;
@@ -87,7 +87,7 @@ var downloadPic = function (__src, __dest) {
     $("#errorCount").html(`<strong>${_allErrorCount}</strong>`);
     let tempdiv = document.getElementById("jindu");
     // 下载完成显示
-    if (_allcount + _allErrorCount == _allImagesCount) {
+    if (_allcount + _allErrorCount === _allImagesCount) {
       tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
       selectDirBtn.disabled = false;
       begin.disabled = false;
@@ -103,7 +103,7 @@ var downloadPic = function (__src, __dest) {
 
 function checkAndMakePath(__path) {
   let ff = fs.existsSync(__path);
-  if (ff == true) {
+  if (ff === true) {
     console.log("不用创建");
   } else {
     fs.mkdirSync(__path);
@@ -117,7 +117,7 @@ const Aria2 = require("aria2");
 //
 function downall(__imgList) {
   myasync.aria2All(__imgList, 4, _board_id_path, function (tt) {
-    if (tt == 'error') {
+    if (tt === 'error') {
       _allcount--;
       _allErrorCount++;
       let temperr = document.getElementById("errorCount");
@@ -144,7 +144,7 @@ function downall(__imgList) {
     tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
     ipc.send("task-progress", _allcount / _allImagesCount);
     // 下载完成显示
-    if (_allcount + _allErrorCount == _allImagesCount) {
+    if (_allcount + _allErrorCount === _allImagesCount) {
       tempdiv.style.width = (_allcount / _allImagesCount) * 100 + "%";
       selectDirBtn.disabled = false;
       begin.disabled = false;
@@ -197,9 +197,9 @@ function checkUpdateId(__checkNewId) {
   // 如果有就检测是否和参数相等，相等就是没有更新，直接跳出
   // 如果不相等就直接写入这个id
   fs.exists(_board_id_path + "/update.txt", function (exists) {
-    if (exists == true) {
+    if (exists === true) {
       _updateId = fs.readFileSync(_board_id_path + "/update.txt", "utf8");
-      if (_updateId == __checkNewId) {
+      if (_updateId === __checkNewId) {
         document.getElementById("selectedItem").innerHTML =
           "没有需要更新的内容！";
         $("#loading").css("visibility", "hidden");
@@ -232,7 +232,7 @@ function checkUpdateId(__checkNewId) {
 //循环获取所有图片到 _allGroups
 function loopGetAllImages() {
   console.log(_allComplete);
-  if (_allComplete != false) {
+  if (_allComplete !== false) {
     document.getElementById("selectedItem").innerHTML +=
       "读取图片完成！开始下载！";
     $("#begin").html(`开始下载`);
@@ -274,7 +274,7 @@ function getSomeAddr(__url) {
     while ((res = regExp.exec(body))) {
       // console.log(res);
       // console.log(_updateId);
-      if (_updateId != "" && res[1] == _updateId) {
+      if (_updateId !== "" && res[1] === _updateId) {
         _allComplete = true;
         // 匹配到和update.txt里的id相同的id号，说明已经读取完更新的图片了
         break;
@@ -294,7 +294,7 @@ function getSomeAddr(__url) {
     }
     console.log(_allGroups.length);
     if (_allGroups.length > 0) {
-      if (_maxid == _allGroups[_allGroups.length - 1][0]) {
+      if (_maxid === _allGroups[_allGroups.length - 1][0]) {
         console.log("到头了，结束");
         _allComplete = true;
       }
@@ -431,7 +431,7 @@ selectDirBtn.addEventListener("click", function (event) {
 begin.addEventListener("click", function (event) {
   _board_id = document.getElementById("huabanID").value;
 
-  if (GPATH != "" && _board_id != "") {
+  if (GPATH !== "" && _board_id !== "") {
     selectDirBtn.disabled = true;
     begin.disabled = true;
     // console.log($('#ale'));
