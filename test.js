@@ -1,32 +1,33 @@
-function* countAppleSales () {
-  var saleList = [3, 7, 5];
-  for (var i = 0; i < saleList.length; i++) {
-    yield saleList[i];
-  }
-}
+const axios = require('axios');
+var arr = ['https://github.com/1', 'https://github.com/2', 'https://github.com/3', 'https://github.com/', 'https://github.com/']
 
 
-//异步方法同步写法
-function re(_url) {
+async function get(item) {
     return new Promise((resolve, reject) => {
-       setTimeout(() => {
-           reject(_url)
-       }, 3000); 
+        axios.get(item)
+            .then(function (response) {
+                console.log(item)
+                resolve()
+            })
+            .catch(function (error) {
+                console.log(error)
+                reject()
+            });
     });
 }
 
-async function go(_url) {
-    try {
-        let p = await re(_url)
-        console.log(p)
-    } catch (e) {
-        console.log('错误'+e)
-    }
-    // re.then(
-    //     (e)=>{
-    //         console.log(e)
-    //     }
-    // )
-}
+let proarr = []
+arr.map(item => {
+    proarr.push(get(item))
+})
 
-go('1')
+
+Promise.all([proarr])
+console.log('一批完成')
+
+// (async () => {
+//     for (let i = 0; i < arr.length; i++) {
+//         const element = arr[i];
+//         await get(element)
+//     }
+// })();
