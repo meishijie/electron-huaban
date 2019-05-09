@@ -12,8 +12,7 @@ async function get(item) {
         axios
             .get(item)
             .then(function (response) {
-                console.log(item);
-                resolve();
+                resolve(response);
             })
             .catch(function (error) {
                 console.log(error);
@@ -22,20 +21,20 @@ async function get(item) {
     });
 }
 
-const fetch = require("node-fetch");
-async function getTitle(url) {
-    let response = await fetch(url);
-    let html = await response.text();
-    return html;
-}
+// const fetch = require("node-fetch");
+// async function getTitle(url) {
+//     let response = await fetch(url);
+//     let html = await response.text();
+//     return html;
+// }
 
-let vv;
+// let vv;
 
-async function go(e) {
-    vv = await getTitle(e);
-    console.log(vv);
-}
-go("http://www.baidu.com/");
+// async function go(e) {
+//     vv = await getTitle(e);
+//     console.log(vv);
+// }
+// go("http://www.baidu.com/");
 
 // const EventEmitter = require("events");
 
@@ -52,3 +51,9 @@ a[0] = 2
 var c = [...a]
 c[0] = 4
 console.log(a)
+let p = get("http://www.baidu.com")
+p.then((res) => {
+    console.log('====================================');
+    console.log(res.data);
+    console.log('====================================');
+})
